@@ -5,7 +5,7 @@ require('dotenv').config();
 
 
 class userController {
-    public static async login(req: Request, res: Response, next: NextFunction){
+    public static async login(req: Request, res: Response,){
         const {isUser: user} = (req as any ).userAuthenticated;
         const secret : any = process.env.SECRET;
 
@@ -23,6 +23,30 @@ class userController {
             console.log(e)
         }
          
+    }
+
+    public static async checkToken(req: Request, res: Response,){
+        const authHeader = req.headers['authorization'];
+        const token: any = authHeader && authHeader.split(" ")[1];
+        const secret : any = process.env.SECRET;
+
+        try {
+            const isValid = jwt.verify(token, secret);
+            res.status(200).json({
+                isSucess: true,
+                requestMessage: 'Token validado com sucesso',
+                requestData: {
+                    isValid
+                }
+            })
+
+        } catch(error){
+
+            res.status(400).json({
+                isSucess: false,
+                requestMessage: 'Token Invalido'
+            })
+        }
     }
 }
 
