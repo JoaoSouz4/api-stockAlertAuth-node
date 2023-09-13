@@ -1,6 +1,8 @@
 import User from '../model/userModel';
 import jwt from 'jsonwebtoken';
-import { NextFunction, Request, Response} from 'express';
+import { Request, Response} from 'express';
+import bcrypt from 'bcrypt';
+
 require('dotenv').config();
 
 
@@ -23,6 +25,29 @@ class userController {
             console.log(e)
         }
          
+    }
+
+    public static async updatePass(req: Request, res: Response){
+
+        const {id, pass} = req.body;
+        
+        try{
+            const userTarget = await User.findById({_id: id});
+            const salt = await bcrypt.genSalt(12);
+            const newPass = await bcrypt.hash(pass, salt);
+
+            await userTarget?.updateOne({pass: newPass});
+
+            res.status(200).json({
+                isSucess: true,
+                requestMessage: 'Senha atualizada com sucesso'
+            })
+        }catch(e){
+            res.status(400).json({
+                isSucess: false,
+                requestMessage: 'erro ao atualizar a senha'
+            })
+        }
     }
 
     public static async checkToken(req: Request, res: Response,){
